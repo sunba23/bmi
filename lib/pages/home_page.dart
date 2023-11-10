@@ -13,39 +13,12 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   GlobalKey<MyCustomFormState> customFormKey = GlobalKey<MyCustomFormState>();
-  String unitSystem = 'metric';
   String? bmiResult;
 
   void updateBmiResult(double result) {
     setState(() {
       bmiResult = result.toStringAsFixed(2);
     });
-  }
-
-  void onUnitSystemChanged(String value) {
-    SharedPreferences.getInstance().then((prefs) {
-      prefs.setString('unitSystem', value);
-    });
-
-    customFormKey.currentState?.clearControllers();
-
-    setState(() {
-      unitSystem = value;
-    });
-    debugPrint(value);
-  }
-
-  @override
-  void initState() {
-    SharedPreferences.getInstance().then((prefs) {
-      String? unitSystemValue = prefs.getString('unitSystem');
-      if (unitSystemValue != null) {
-        setState(() {
-          unitSystem = unitSystemValue;
-        });
-      }
-    });
-    super.initState();
   }
 
   void goToHistory() {
@@ -72,25 +45,7 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             MyCustomForm(
-              unitSystem: unitSystem,
               callback: updateBmiResult,
-              customKey: customFormKey,
-            ),
-            DropdownButton(
-              value: unitSystem,
-              items: const [
-                DropdownMenuItem(
-                  value: 'metric',
-                  child: Text('Metric'),
-                ),
-                DropdownMenuItem(
-                  value: 'imperial',
-                  child: Text('Imperial'),
-                ),
-              ],
-              onChanged: (String? value) {
-                onUnitSystemChanged(value!);
-              },
             ),
             bmiResult != null
                 ? Text(

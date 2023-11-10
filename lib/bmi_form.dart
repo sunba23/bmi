@@ -3,11 +3,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:app/bmi_history_object.dart';
 
 class MyCustomForm extends StatefulWidget {
-  const MyCustomForm({super.key, required this.unitSystem, required this.callback, required this.customKey});
+  const MyCustomForm({super.key, required this.callback});
 
-  final String unitSystem;
+  // final String unitSystem;
   final void Function(double result) callback;
-  final GlobalKey customKey;
 
   @override
   MyCustomFormState createState() {
@@ -17,13 +16,40 @@ class MyCustomForm extends StatefulWidget {
 
 class MyCustomFormState extends State<MyCustomForm> {
 
-  // final _formKey = GlobalKey<FormState>();
+  final formKey = GlobalKey<FormState>();
   final weightController = TextEditingController();
   final heightController = TextEditingController();
+  String unitSystem = 'metric';
+
+  @override
+  void initState() {
+    SharedPreferences.getInstance().then((prefs) {
+      String? unitSystemValue = prefs.getString('unitSystem');
+      if (unitSystemValue != null) {
+        setState(() {
+          unitSystem = unitSystemValue;
+        });
+      }
+    });
+    super.initState();
+  }
 
   void clearControllers() {
     weightController.clear();
     heightController.clear();
+  }
+
+  void onUnitSystemChanged(String value) {
+    SharedPreferences.getInstance().then((prefs) {
+      prefs.setString('unitSystem', value);
+    });
+
+    clearControllers();
+
+    setState(() {
+      unitSystem = value;
+    });
+    debugPrint(value);
   }
 
   Future<void> onFormPressed() async {
@@ -42,7 +68,7 @@ class MyCustomFormState extends State<MyCustomForm> {
     await prefs.setDouble('height', height);
 
     //convert imperial to metric and calculate bmi
-    if (widget.unitSystem == 'imperial') {
+    if (unitSystem == 'imperial') {
       weight = 0.453592 * weight; // lbs to kg
       height = 2.54 * height; // in to cm
     }
@@ -54,7 +80,7 @@ class MyCustomFormState extends State<MyCustomForm> {
       height: height,
       result: result,
       date: DateTime.now().toString(),
-      system: widget.unitSystem,
+      system: unitSystem,
     );
     String jsonifiedHistoryObject = historyObject.jsonify();
 
@@ -86,7 +112,7 @@ class MyCustomFormState extends State<MyCustomForm> {
   Widget build(BuildContext context) {
     print('BmiForm build called');
     return Form(
-      key: widget.customKey,
+      key: formKey,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 25),
         child: Column(
@@ -115,6 +141,22 @@ class MyCustomFormState extends State<MyCustomForm> {
                   return 'Please enter a valid height';
                 }
                 return null;
+              },
+            ),
+            DropdownButton(
+              value: unitSystem,
+              items: const [
+                DropdownMenuItem(
+                  value: 'metric',
+                  child: Text('Metric'),
+                ),
+                DropdownMenuItem(
+                  value: 'imperial',
+                  child: Text('Imperial'),
+                ),
+              ],
+              onChanged: (String? value) {
+                onUnitSystemChanged(value!);
               },
             ),
             ElevatedButton(
