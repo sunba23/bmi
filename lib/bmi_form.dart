@@ -3,9 +3,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:app/bmi_history_object.dart';
 
 class MyCustomForm extends StatefulWidget {
-  const MyCustomForm({super.key, required this.unitSystem});
+  const MyCustomForm({super.key, required this.unitSystem, required this.callback, required this.customKey});
 
   final String unitSystem;
+  final void Function(double result) callback;
+  final GlobalKey customKey;
 
   @override
   MyCustomFormState createState() {
@@ -15,27 +17,20 @@ class MyCustomForm extends StatefulWidget {
 
 class MyCustomFormState extends State<MyCustomForm> {
 
-  final _formKey = GlobalKey<FormState>();
+  // final _formKey = GlobalKey<FormState>();
   final weightController = TextEditingController();
   final heightController = TextEditingController();
 
-  Future<void> onFormPressed() async {
-    if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(
-          content: Text('Processing Data'),
-          duration: Duration(seconds: 1),
-      ));
-    } else {
-      return;
-    }
+  void clearControllers() {
+    weightController.clear();
+    heightController.clear();
+  }
 
-    print("1");
+  Future<void> onFormPressed() async {
     //get the weight and height from the form
     double weight = double.parse(weightController.text);
     double height = double.parse(heightController.text);
 
-    print("2");
     //save the weight and height to shared preferences
     // SharedPreferences.getInstance().then((prefs) {
     //   prefs.setDouble('weight', weight);
@@ -46,7 +41,6 @@ class MyCustomFormState extends State<MyCustomForm> {
     await prefs.setDouble('weight', weight);
     await prefs.setDouble('height', height);
 
-    print("3");
     //convert imperial to metric and calculate bmi
     if (widget.unitSystem == 'imperial') {
       weight = 0.453592 * weight; // lbs to kg
@@ -54,7 +48,6 @@ class MyCustomFormState extends State<MyCustomForm> {
     }
     double result = weight / ((height / 100) * (height / 100));
 
-    print("4");
     //create a BmiHistoryObject and use its jsonify method
     BmiHistoryObject historyObject = BmiHistoryObject(
       weight: weight,
@@ -65,7 +58,6 @@ class MyCustomFormState extends State<MyCustomForm> {
     );
     String jsonifiedHistoryObject = historyObject.jsonify();
 
-    print("5");
     //save the json string to shared preferences
     SharedPreferences.getInstance().then((prefs) {
       List<String>? history = prefs.getStringList('history');
@@ -77,59 +69,60 @@ class MyCustomFormState extends State<MyCustomForm> {
     //print the history from shared prefs
     SharedPreferences.getInstance().then((prefs) {
       List<String>? history = prefs.getStringList('history');
-      print("history is");
-      print(history);
     });
 
-    print("6");
     // display the result
     displayResult(result);
+
+    // weightController.clear();
+    // heightController.clear();
   }
 
   void displayResult(double result) {
-    String resultString = result.toStringAsFixed(2);
-    // return Text('Your BMI is $resultString');
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(resultString)));
+    widget.callback(result);
   }
 
   @override
   Widget build(BuildContext context) {
+    print('BmiForm build called');
     return Form(
-      key: _formKey,
-      child: Column(
-        children: <Widget>[
-          TextFormField(
-            controller: weightController,
-            decoration: const InputDecoration(
-              border: UnderlineInputBorder(),
-              labelText: 'Weight',
+      key: widget.customKey,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 25),
+        child: Column(
+          children: <Widget>[
+            TextFormField(
+              controller: weightController,
+              decoration: const InputDecoration(
+                border: UnderlineInputBorder(),
+                labelText: 'Weight',
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty || double.tryParse(value) == null) {
+                  return 'Please enter a valid weight';
+                }
+                return null;
+              },
             ),
-            validator: (value) {
-              if (value == null || value.isEmpty || double.tryParse(value) == null) {
-                return 'Please enter a valid weight';
-              }
-              return null;
-            },
-          ),
-          TextFormField(
-            controller: heightController,
-            decoration: const InputDecoration(
-              border: UnderlineInputBorder(),
-              labelText: 'Height',
+            TextFormField(
+              controller: heightController,
+              decoration: const InputDecoration(
+                border: UnderlineInputBorder(),
+                labelText: 'Height',
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty || double.tryParse(value) == null) {
+                  return 'Please enter a valid height';
+                }
+                return null;
+              },
             ),
-            validator: (value) {
-              if (value == null || value.isEmpty || double.tryParse(value) == null) {
-                return 'Please enter a valid height';
-              }
-              return null;
-            },
-          ),
-          ElevatedButton(
-            onPressed: onFormPressed,
-            child: const Text('Submit'),
-          ),
-        ],
+            ElevatedButton(
+              onPressed: onFormPressed,
+              child: const Text('Submit'),
+            ),
+          ],
+        ),
       ),
     );
   }
