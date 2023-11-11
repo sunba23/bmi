@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:app/bmi_history_object.dart';
-import 'package:app/bmi_history_widget.dart';
+import 'package:app/utils/bmi_history_object.dart';
+import 'package:app/utils/bmi_history_widget.dart';
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({Key? key, required this.title}) : super(key: key);
@@ -44,7 +44,6 @@ class _HistoryPageState extends State<HistoryPage> {
         }
 
         bmiHistoryObjects = bmiHistoryObjectsValue;
-        print(bmiHistoryObjects);
       }
       return historyValue;
     });
@@ -53,19 +52,45 @@ class _HistoryPageState extends State<HistoryPage> {
   }
 
   void deleteHistory() {
-    SharedPreferences.getInstance().then((prefs) {
-      prefs.remove('history');
-    });
-    setState(() {
-      bmiHistoryObjects = [];
-    });
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete History'),
+          content: const Text('Are you sure you want to delete the BMI history?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                // Delete history and close the dialog
+                SharedPreferences.getInstance().then((prefs) {
+                  prefs.remove('history');
+                });
+                setState(() {
+                  bmiHistoryObjects = [];
+                });
+                Navigator.of(context).pop();
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
   }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('History page'),
+        elevation: 0,
         actions: <Widget>[
           IconButton(
             onPressed: deleteHistory,
@@ -83,11 +108,21 @@ class _HistoryPageState extends State<HistoryPage> {
           } else {
             if (snapshot.hasData && snapshot.data != null) {
               // Display the BMI history widgets
-              return ListView(
-                children: getBmiHistoryWidgets(),
+              return Padding(
+                padding: const EdgeInsets.only(top: 15),
+                child: ListView(
+                  children: getBmiHistoryWidgets(),
+                ),
               );
             } else {
-                return const Text('No BMI history available.');
+                return const Center(
+                  child: Text(
+                    'No BMI history available.',
+                    style: TextStyle(
+                      fontSize: 30,
+                    ),
+                  ),
+                );
             }
           }
         },

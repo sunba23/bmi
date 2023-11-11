@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:app/bmi_history_object.dart';
+import 'package:app/utils/bmi_history_object.dart';
+
+import 'bmi_result_widget.dart';
 
 Widget bmiHistoryWidget(BmiHistoryObject bmiHistoryObject, BuildContext context) {
   return Padding(
-    padding: const EdgeInsets.all(8.0),
+    padding: const EdgeInsets.fromLTRB(8, 12, 8, 12,),
     child: SizedBox(
       height: 110,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
         child: Container(
-          color: Theme.of(context).colorScheme.primary,
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.6),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -48,7 +50,11 @@ Height: ${bmiHistoryObject.height} cm
                                 : Text('''
 Weight: ${bmiHistoryObject.weight} lbs,
 Height: ${bmiHistoryObject.height} in,
-                                '''),
+                                ''',
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -56,15 +62,11 @@ Height: ${bmiHistoryObject.height} in,
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 30),
-                      child: Text(
+                      child: bmiResultWidget(
                         bmiHistoryObject.result.toStringAsFixed(2),
-                        style: TextStyle(
-                          color: (bmiHistoryObject.result < 18.5 || bmiHistoryObject.result > 24.5)
-                              ? Colors.red
-                              : Colors.green,
-                          fontSize: 40
-                        ),
-                      ),
+                        40,
+                        context,
+                      )
                     )
                   ],
                 ),

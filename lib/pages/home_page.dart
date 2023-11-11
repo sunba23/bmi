@@ -1,6 +1,8 @@
+import 'package:app/other/transitions.dart';
 import 'package:flutter/material.dart';
-import 'package:app/bmi_form.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:app/utils/bmi_form.dart';
+import 'package:app/utils/bmi_result_widget.dart';
+
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -12,25 +14,33 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  GlobalKey<MyCustomFormState> customFormKey = GlobalKey<MyCustomFormState>();
+  // GlobalKey<MyCustomFormState> customFormKey = GlobalKey<MyCustomFormState>();
   String? bmiResult;
 
   void updateBmiResult(double result) {
-    setState(() {
-      bmiResult = result.toStringAsFixed(2);
-    });
+    if (result == 0) {
+      setState(() {
+        bmiResult = null;
+      });
+    } else {
+      setState(() {
+        bmiResult = result.toStringAsFixed(2);
+      });
+    }
   }
 
   void goToHistory() {
-    Navigator.pushNamed(context, '/history');
+    Navigator.of(context).push(createHistoryRoute());
   }
 
   @override
   Widget build(BuildContext context) {
-    print('MyHomePage build called');
     return Scaffold(
+      resizeToAvoidBottomInset: false,
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
         title: Text(widget.title),
+        elevation: 0,
         actions: <Widget>[
           IconButton(
             onPressed: goToHistory,
@@ -42,23 +52,15 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            const SizedBox(height: 180),
             MyCustomForm(
               callback: updateBmiResult,
             ),
+            const SizedBox(height: 40),
             bmiResult != null
-                ? Text(
-                    bmiResult!,
-                    style: TextStyle(
-                      fontSize: 30,
-                      color: (double.parse(bmiResult!) < 18.5 || (double.parse(bmiResult!) > 24.5)
-                          ? Colors.red
-                          : Colors.green
-                    ),
-                  )
-                )
-                : const SizedBox()
+                ? bmiResultWidget(bmiResult!, 50, context)
+                : const SizedBox(),
           ]
         )
       ),
