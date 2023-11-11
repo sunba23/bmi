@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:app/utils/bmi_history_object.dart';
 import 'package:app/utils/double_input_field.dart';
@@ -68,14 +69,21 @@ class MyCustomFormState extends State<MyCustomForm> {
       await prefs.setDouble('weight', weight);
       await prefs.setDouble('height', height);
 
-      //convert imperial to metric and calculate bmi
+      double inputWeight = weight;
+      double inputHeight = height;
+
       if (unitSystem == 'imperial') {
         weight = 0.453592 * weight; // lbs to kg
         height = 2.54 * height; // in to cm
       }
       double result = weight / ((height / 100) * (height / 100));
 
-      //create a BmiHistoryObject and use its jsonify method
+      //if was imperial, we changed weight and height - set them back to imperial
+      if (unitSystem == 'imperial') {
+        weight = inputWeight;
+        height = inputHeight;
+      }
+
       BmiHistoryObject historyObject = BmiHistoryObject(
         weight: weight,
         height: height,
@@ -93,7 +101,8 @@ class MyCustomFormState extends State<MyCustomForm> {
         prefs.setStringList('history', history);
       });
 
-      // display the result
+      FocusManager.instance.primaryFocus?.unfocus(); //dismiss keyboard
+
       displayResult(result);
     }
   }
@@ -108,63 +117,74 @@ class MyCustomFormState extends State<MyCustomForm> {
       key: formKey,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 25),
-        child: Column(
-          children: <Widget>[
-            DoubleInputField(controller: heightController, label: "Height", hint: "", labelSize: 20),
-            const SizedBox(height: 15,),
-            DoubleInputField(controller: weightController, label: "Weight", hint: "", labelSize: 20),
-            Padding(
-              padding: const EdgeInsets.only(top: 30),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 100,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: Colors.grey[200],
-                    ),
-                    child: Center(
-                      child: DropdownButton(
-                        dropdownColor: Colors.grey[200],
-                        elevation: 0,
-                        value: unitSystem,
-                        items: const [
-                          DropdownMenuItem(
-                            value: 'metric',
-                            child: Text('Metric'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'imperial',
-                            child: Text('Imperial'),
-                          ),
-                        ],
-                        onChanged: (String? value) {
-                          onUnitSystemChanged(value!);
-                        },
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 20,),
-                  ElevatedButton(
-                    onPressed: onFormPressed,
-                    style: ButtonStyle(
-                      fixedSize: MaterialStateProperty.all(const Size(100, 50)),
-                      textStyle: MaterialStateProperty.all(
-                        const TextStyle(
-                          fontSize: 20,
-                        )
-                      )
-                    ),
-                    child: const Text('Submit')
-                  ),
-                ],
+        child: AnimationLimiter(
+          child: Column(
+            children: AnimationConfiguration.toStaggeredList(
+              duration: const Duration(milliseconds: 700),
+              childAnimationBuilder: (widget) => SlideAnimation(
+                horizontalOffset: 50.0,
+                child: FadeInAnimation(
+                  child: widget,
+                ),
               ),
+              children: <Widget>[
+                DoubleInputField(controller: heightController, label: "Height", hint: "", labelSize: 20),
+                const SizedBox(height: 15,),
+                DoubleInputField(controller: weightController, label: "Weight", hint: "", labelSize: 20),
+                Padding(
+                  padding: const EdgeInsets.only(top: 30),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 100,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.grey[200],
+                        ),
+                        child: Center(
+                          child: DropdownButton(
+                            dropdownColor: Colors.grey[200],
+                            elevation: 0,
+                            value: unitSystem,
+                            items: const [
+                              DropdownMenuItem(
+                                value: 'metric',
+                                child: Text('Metric'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'imperial',
+                                child: Text('Imperial'),
+                              ),
+                            ],
+                            onChanged: (String? value) {
+                              onUnitSystemChanged(value!);
+                            },
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 20,),
+                      ElevatedButton(
+                        onPressed: onFormPressed,
+                        style: ButtonStyle(
+                          fixedSize: MaterialStateProperty.all(const Size(100, 50)),
+                          textStyle: MaterialStateProperty.all(
+                            const TextStyle(
+                              fontSize: 20,
+                            )
+                          )
+                        ),
+                        child: const Text('Submit')
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
+      )
     );
   }
 }

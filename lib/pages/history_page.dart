@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:app/utils/bmi_history_object.dart';
 import 'package:app/utils/bmi_history_widget.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({Key? key, required this.title}) : super(key: key);
@@ -17,12 +20,20 @@ class _HistoryPageState extends State<HistoryPage> {
   List<BmiHistoryObject> bmiHistoryObjects = [];
 
   List<Widget> getBmiHistoryWidgets() {
-    List<Widget> bmiHistoryWidgets = [];
-    for (BmiHistoryObject bmiHistoryObject in bmiHistoryObjects) {
-      bmiHistoryWidgets.add(bmiHistoryWidget(bmiHistoryObject, context));
-    }
-    return bmiHistoryWidgets;
+    return AnimationConfiguration.toStaggeredList(
+      duration: const Duration(milliseconds: 500),
+      childAnimationBuilder: (widget) => SlideAnimation(
+        verticalOffset: 50.0,
+        child: FadeInAnimation(
+          child: widget,
+        ),
+      ),
+      children: bmiHistoryObjects.map((bmiHistoryObject) {
+        return bmiHistoryWidget(bmiHistoryObject, context);
+      }).toList(),
+    );
   }
+
 
   @override
   void initState() {

@@ -17,4 +17,5 @@ To use the app (assuming you have flutter installed and set up), follow these st
 4. **Run the App:**\
    <code>flutter run</code>
 
+### License
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

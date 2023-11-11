@@ -1,19 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:app/pages/bmi_description_page.dart';
-import 'package:app/utils/bmi_result_widget.dart';
+import 'package:app/other/transitions.dart';
 
 Widget bmiResultWidget (String bmiResult, double fontSize, BuildContext context) {
   return GestureDetector(
     onTap: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => BmiDescriptionPage(
-            title: 'BMI Description',
-            result: double.parse(bmiResult),
-          ),
-        ),
-      );
+      Navigator.of(context).push(createBmiDescriptionRoute(double.parse(bmiResult)));
     },
     child: Center(
       child: Text(

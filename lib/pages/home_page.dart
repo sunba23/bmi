@@ -14,7 +14,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  // GlobalKey<MyCustomFormState> customFormKey = GlobalKey<MyCustomFormState>();
   String? bmiResult;
 
   void updateBmiResult(double result) {
@@ -62,7 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ? bmiResultWidget(bmiResult!, 50, context)
                 : const SizedBox(),
           ]
-        )
+        ),
       ),
     );
   }
