@@ -50,7 +50,6 @@ class MyCustomFormState extends State<MyCustomForm> {
     setState(() {
       unitSystem = value;
     });
-    debugPrint(value);
   }
 
   Future<void> onFormPressed() async {

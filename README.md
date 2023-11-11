@@ -1,16 +1,18 @@
-# app
+# BMI Flutter app
 
-A new Flutter project.
+### What does this app do?
+This app lets you:
+1. calculate BMI in different unit systems and see what it means for you
+2. View your last 10 BMI calculations via history to keep track of your progress.
 
-## Getting Started
+### How do I use it?
+To use the app (assuming you have flutter installed and set up), follow these steps:
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+1. **Clone this repository:**\
+   <code>git clone https://github.com/sunba23/BMI-app.git </code>
+2. **Navigate to the project directory:**\
+   <code>cd app</code>
+3. **Install Dependencies:**\
+   <code>flutter pub get</code>
+4. **Run the App:**\
+   <code>flutter run</code>
