@@ -15,6 +15,6 @@ To use the app (assuming you have flutter installed and set up), follow these st
 3. **Install Dependencies:**\
    <code>flutter pub get</code>
 4. **Run the App:**\
-   <code>flutter run</code>\
+   <code>flutter run</code>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
